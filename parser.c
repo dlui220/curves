@@ -82,6 +82,157 @@ void parse_file ( char * filename,
   while ( fgets(line, 255, f) != NULL ) {
     line[strlen(line)-1]='\0';
     printf(":%s:\n",line);  
+
+		/* line: add a line to the edge matrix -  */
+		/* 		   takes 6 arguments (x0, y0, z0, x1, y1, z1) */
+		if (strcmp(line, "line") == 0) {
+			fgets(line, 255, f);
+			line[strlen(line) - 1] = '\0';
+
+			printf("LINE: %s\n", line);
+      
+			char * points[6];
+			int i;
+
+			points[0] = strtok(line, " ");
+      
+			for(i = 0; i < 5; i++)
+				points[i+1] = strtok(NULL, " ");
+
+			add_edge(pm, atof(points[0]), atof(points[1]), atof(points[2]), atof(points[3]), atof(points[4]), atof(points[5]));
+		}
+		/* circle: add a circle to the edge matrix -  */
+		/*         takes 3 arguments (cx, cy, r) */
+		else if (strcmp(line, "circle") == 0) {
+			fgets(line, 255, f);
+			line[strlen(line) - 1] = '\0';
+
+			char * points[3];
+			int i;
+
+			points[0] = strtok(line, " ");
+      
+			for(i = 0; i < 2; i++)
+				points[i + 1] = strtok(NULL, " ");
+
+			add_circle(pm, atof(points[0]), atof(points[1]), atof(points[2]), 1000);
+		}
+		/* hermite: add a hermite curve to the edge matrix - */
+		/*          takes 8 arguments (x0, y0, x1, y1, x2, y2, x3, y3) */
+		else if (strcmp(line, "hermite") == 0) {
+			fgets(line, 255, f);
+			line[strlen(line) - 1] = '\0';
+
+			char * points[8];
+			int i;
+      
+			points[0] = strtok(line, " ");
+      
+			for(i = 0; i < 7; i++)
+				points[i + 1] = strtok(NULL, " ");
+
+			printf("Hermite Curve: %s,%s,%s,%s,%s,%s,%s,%s\n", points[0],points[1],points[2],points[3],points[4],points[5],points[6],points[7]);
+      
+			add_curve(pm, atof(points[0]), atof(points[1]), atof(points[2]), atof(points[3]), atof(points[4]), atof(points[5]), atof(points[6]), atof(points[7]), 100, HERMITE_MODE);
+		}
+		/* bezier: add a bezier curve to the edge matrix - */
+		/*         takes 8 arguments (x0, y0, x1, y1, x2, y2, x3, y3) */
+		else if (strcmp(line, "bezier") == 0) {
+			fgets(line, 255, f);
+			line[strlen(line) - 1] = '\0';
+
+			char * points[8];
+			int i;
+
+			points[0] = strtok(line, " ");
+      
+			for(i = 0; i < 7; i++)
+				points[i + 1] = strtok(NULL, " ");
+
+			add_curve(pm, atof(points[0]), atof(points[1]), atof(points[2]), atof(points[3]), atof(points[4]), atof(points[5]), atof(points[6]), atof(points[7]), 1000, BEZIER_MODE); 
+		}
+		/* ident: set the transform matrix to the identity matrix */
+		else if (strcmp(line, "ident") == 0) {
+			ident(transform);
+		}
+		/* translate: create a translation matrix,  */
+		/* 		        then multiply the transform matrix by the translation matrix -  */
+		/*        		takes 3 arguments (tx, ty, tz) */
+		else if (strcmp(line, "translate") == 0) {
+			fgets(line, 255, f);
+			line[strlen(line) - 1] = '\0';
+
+			char * sX, * sY, * sZ;
+
+			sX = strtok(line, " ");
+			sY = strtok(NULL, " ");
+			sZ = strtok(NULL, " ");
+
+			transform = make_translate(atof(sX), atof(sY), atof(sZ));
+		}
+		/* scale: create a scale matrix,  */
+		/*        then multiply the transform matrix by the scale matrix -  */
+		/*        takes 3 arguments (sx, sy, sz) */
+		else if (strcmp(line, "scale") == 0) {
+			fgets(line, 255, f);
+			line[strlen(line) - 1] = '\0';
+			char * sX, * sY, * sZ;
+			sX = strtok(line, " ");
+			sY = strtok(NULL, " ");
+			sZ = strtok(NULL, " ");
+
+			transform = make_scale(atof(sX), atof(sY), atof(sZ));
+		}
+		/* xrotate: create an x-axis rotation matrix, */
+		/* 	       	then multiply the transform matrix by the rotation matrix - */
+		/* 	      	takes 1 argument (theta) */
+		else if (strcmp(line, "xrotate") == 0) {
+			fgets(line, 255, f);
+			line[strlen(line) - 1] = '\0';
+      
+			matrix_mult(make_rotX(M_PI * atof(line) / 180), transform);
+		}
+		/* yrotate: create an y-axis rotation matrix, */
+		/*          then multiply the transform matrix by the rotation matrix - */
+		/*          takes 1 argument (theta) */
+		else if (strcmp(line, "yrotate") == 0) {
+			fgets(line, 255, f);
+			line[strlen(line) - 1] = '\0';
+			matrix_mult(make_rotY(M_PI * atof(line) / 180), transform);
+		}
+		/* zrotate: create an z-axis rotation matrix, */
+		/* 		      then multiply the transform matrix by the rotation matrix - */
+		/* 	      	takes 1 argument (theta) */
+		else if (strcmp(line, "zrotate") == 0) {
+			fgets(line, 255, f);
+			line[strlen(line) - 1] = '\0';
+      matrix_mult(make_rotZ(M_PI * atof(line) / 180), transform);
+		}
+		/* apply: apply the current transformation matrix to the edge matrix */
+		else if (strcmp(line, "apply") == 0) {
+			matrix_mult(transform, pm);
+		}
+		/* display: draw the lines of the edge matrix to the screen */
+		/*          display the screen */
+		else if (strcmp(line, "display") == 0) {
+			color c;
+			c.red = 255;
+			c.green = 150;
+			c.blue = 100;
+			draw_lines(pm, s, c);
+			display(s);
+			clear_screen(s);
+		}
+		/* save: draw the lines of the edge matrix to the screen */
+		/* 		   save the screen to a file - */
+		/* 	     takes 1 argument (file name) */
+		else if (strcmp(line, "save") == 0) {
+			save_extension(s, "curves.png");
+		}
+		/* quit: end parsing */
+		else if (strcmp(line, "quit") == 0) {
+			exit(0);
+		}
   }
 }
 
