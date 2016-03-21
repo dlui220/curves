@@ -272,6 +272,26 @@ struct matrix * make_rotZ(double theta) {
   to generate the coefiecients for a bezier curve
   ====================*/
 struct matrix * make_bezier() {
+	struct matrix * temp = new_matrix(4, 4);
+  ident(temp);
+
+  temp->m[0][0] = -1;
+  temp->m[0][1] = 3;
+  temp->m[0][2] = -3;
+  temp->m[0][3] = 1;
+
+  temp->m[1][0] = 3;
+  temp->m[1][1] = -6;
+  temp->m[1][2] = 3;
+
+  temp->m[2][0] = -3;
+  temp->m[2][1] = 3;
+  temp->m[2][2] = 0;
+  
+  temp->m[3][0] = 1;
+  temp->m[3][3] = 0;
+  
+  return temp;
 }
 
 /*======== struct matrix * make_hermite()) ==========
@@ -282,14 +302,31 @@ struct matrix * make_bezier() {
   the coefiecients for a hermite curve
   ====================*/
 struct matrix * make_hermite() {
+	struct matrix * temp = new_matrix(4, 4);
+  ident(temp);
+
+  temp->m[0][0] = 2;
+  temp->m[0][1] = -2;
+  temp->m[0][2] = 1;
+  temp->m[0][3] = 1;
+	
+  temp->m[1][0] = -3;
+  temp->m[1][1] = 3;
+  temp->m[1][2] = -2; 
+  temp->m[1][3] = -1;
+	
+  temp->m[3][0] = 1;
+  temp->m[3][3] = 0;
+  
+  return temp;
 }
 
 /*======== struct matrix * generate_curve_coefs() ==========
   Inputs:   double p1
-            double p2
-	    double p3
-	    double p4
-	    int type
+	double p2
+	double p3
+	double p4
+	int type
   Returns: 
   
   A matrix containing the values for a, b, c and d of the
@@ -299,6 +336,21 @@ struct matrix * make_hermite() {
   Type determines whether the curve is bezier or hermite
   ====================*/
 struct matrix * generate_curve_coefs( double p1, double p2, 
-				      double p3, double p4, int type) {
+																			double p3, double p4, int type) {
+	struct matrix * temp = new_matrix(4, 1);
+  
+  temp->m[0][0] = p1;
+  temp->m[1][0] = p2;
+  temp->m[2][0] = p3;
+  temp->m[3][0] = p4;
+
+	// check type parameter
+  if (type == HERMITE_MODE) {
+    matrix_mult(make_hermite(),temp);
+  }else{
+    matrix_mult(make_bezier(),temp);
+  }
+
+  return temp;
 }
 
