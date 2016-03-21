@@ -216,8 +216,8 @@ void parse_file ( char * filename,
 		/*          display the screen */
 		else if (strcmp(line, "display") == 0) {
 			color c;
-			c.red = 255;
-			c.green = 150;
+			c.red = 0;
+			c.green = 250;
 			c.blue = 100;
 			draw_lines(pm, s, c);
 			display(s);
